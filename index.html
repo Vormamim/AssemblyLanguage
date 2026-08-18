@@ -111,6 +111,24 @@
   </div>
 
   <div class="card">
+    <h3>Real chips have more than one register &mdash; meet the Z80</h3>
+    <div class="theory">
+      <p>EduCPU-8 only has one general-purpose register, <strong>ACC</strong>, on purpose &mdash; every value has to pass through the same spot, so "process" is always easy to point at. Real chips almost never stop at one.</p>
+      <p>Take the <strong>Zilog Z80</strong> (1976) &mdash; the chip inside the ZX Spectrum, the original Game Boy, the Sega Master System, and thousands of arcade machines. Instead of a single ACC, it has an accumulator <em>plus six more</em> general-purpose 8-bit registers, all usable at the same time:</p>
+      <table class="data">
+        <thead><tr><th>Register</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td><code>A</code></td><td>the accumulator &mdash; same job as EduCPU-8's ACC</td></tr>
+          <tr><td><code>B, C, D, E, H, L</code></td><td>six more general-purpose registers, free to hold values alongside A</td></tr>
+          <tr><td><code>BC, DE, HL</code></td><td>those same six, paired up into three 16-bit registers &mdash; handy for addresses and bigger numbers</td></tr>
+        </tbody>
+      </table>
+      <p>Why does that matter? Look back at Multiply by Repeated Addition or Sum from 1 to N &mdash; notice how many <code>LOAD</code>/<code>STORE</code> instructions exist purely to shuffle a value in and out of ACC, because ACC is the only place to put anything. A chip with a spare <code>B</code> or <code>C</code> register could just leave that value sitting there instead &mdash; fewer instructions, less memory traffic, for exactly the same job.</p>
+      <p>The trade-off: more registers means more to keep track of, and a lot more to explain before "the CPU is just following instructions" starts to make sense. That's the whole reason EduCPU-8 stops at one.</p>
+    </div>
+  </div>
+
+  <div class="card">
     <h3>How to use this IDE</h3>
     <div class="theory">
       <p>1. Click an example button to load a ready-made program, or type your own into the editor.</p>
