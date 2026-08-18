@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduCPU-8 — Visual Assembly Simulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">LoFiCPU-8 &middot; Visual Assembly Simulator</p>
+    <h1>How do we talk to a CPU</h1>
+    <p class="sub">This chip has 16 memory cells and 9 instructions. Load an example, click Step, and watch Input become Process become Output.</p>
+  </header>
+
+  <div class="ipo-legend">
+    <span class="ipo-chip ipo-input">Input</span>
+    <span class="ipo-chip ipo-process">Process</span>
+    <span class="ipo-chip ipo-output">Output</span>
+  </div>
+
+  <div class="examples-bar panel">
+    <span class="panel-label">Load an example</span>
+    <div class="examples-buttons">
+      <button class="btn secondary" data-example="hello">Hello Text</button>
+      <button class="btn secondary" data-example="copyNumber">Copy a Number</button>
+      <button class="btn secondary" data-example="addTwo">Add Two Numbers</button>
+      <button class="btn secondary" data-example="subtractTwo">Subtract Two Numbers</button>
+      <button class="btn secondary" data-example="areEqual">Are They Equal?</button>
+      <button class="btn secondary" data-example="countdown">Countdown Loop</button>
+      <button class="btn secondary" data-example="skipCounting">Skip Counting by Twos</button>
+      <button class="btn secondary" data-example="multiply">Multiply by Repeated Addition</button>
+      <button class="btn secondary" data-example="powersOfTwo">Powers of Two</button>
+      <button class="btn secondary" data-example="overflow">Overflow!</button>
+    </div>
+  </div>
+
+  <div class="panel process-panel">
+    <div class="panel-head">
+      <span class="panel-label">Process &mdash; your program</span>
+      <div class="controls">
+        <button id="assembleBtn" class="btn">Assemble &amp; Load</button>
+        <button id="editBtn" class="btn secondary" hidden>Edit code</button>
+        <button id="stepBtn" class="btn secondary" disabled>Step</button>
+        <button id="runBtn" class="btn secondary" disabled>Run</button>
+        <button id="pauseBtn" class="btn secondary" hidden>Pause</button>
+        <button id="resetBtn" class="btn secondary" disabled>Reset</button>
+        <label class="speed-label">Speed
+          <input id="speedSlider" type="range" min="1" max="10" value="4">
+        </label>
+      </div>
+    </div>
+
+    <div id="errorBox" class="alert error" hidden></div>
+
+    <textarea id="codeEditor" spellcheck="false" rows="10"></textarea>
+    <ul id="programListing" class="program-listing" hidden></ul>
+
+    <div class="registers">
+      <div class="register" id="regAccBox">
+        <span class="reg-label">ACC</span><span id="regAcc" class="reg-value">0</span>
+        <div id="regAccBits" class="bit-row acc-bit-row"></div>
+        <div id="regAccPlaces" class="bit-places"></div>
+      </div>
+      <div class="register" id="regPcBox"><span class="reg-label">PC (line)</span><span id="regPc" class="reg-value">&mdash;</span></div>
+      <div class="register" id="regZBox"><span class="reg-label">Zero flag</span><span id="regZ" class="reg-value">0</span></div>
+    </div>
+  </div>
+
+  <div class="io-grid">
+    <div class="panel input-panel">
+      <span class="panel-label">Input &mdash; memory (click a cell to edit)</span>
+      <div id="memoryGrid" class="memory-grid"></div>
+    </div>
+
+    <div class="panel output-panel">
+      <span class="panel-label">Output &mdash; console</span>
+      <pre id="console" class="console"></pre>
+      <p id="consoleStatus" class="halted-note" hidden></p>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <span>EduCPU-8 is a made-up teaching chip &mdash; not a real instruction set.</span>
+  </footer>
+</div>
+
+<button class="rail-toggle" id="railToggle">Theory &amp; Help</button>
+<aside class="rail" id="rail" aria-label="Theory and instructions">
+  <button class="rail-close" id="railClose" title="Close">Close</button>
+  <p class="eyebrow">Reference</p>
+  <h2>Theory &amp; instructions</h2>
+
+  <div class="card">
+    <h3>The registers: ACC, PC, Zero flag</h3>
+    <div class="theory">
+      <p>Three small boxes above the program listing show exactly what the CPU is holding right now:</p>
+      <ul>
+        <li><strong>ACC</strong> (accumulator) &mdash; the chip's only general-purpose register. Every <code>LOAD</code>, <code>ADD</code> and <code>SUB</code> reads or writes it, so it's always the current "working value" &mdash; and its 8 bits are shown live underneath it.</li>
+        <li><strong>PC</strong> (line) &mdash; the program counter. It's the line number the CPU is about to run next &mdash; the same line highlighted in the listing below. It shows <code>&mdash;</code> once the program halts.</li>
+        <li><strong>Zero flag</strong> &mdash; a tiny yes/no switch: is ACC exactly 0 right now, or not? See below.</li>
+      </ul>
+      <p>All three flash violet whenever they change, so you can watch them update one Step at a time.</p>
+      <p><strong>The Zero flag, step by step:</strong> it doesn't move data or do maths &mdash; its only job is to answer one question. Every time <code>LOAD</code>, <code>ADD</code> or <code>SUB</code> runs, the CPU checks: "did ACC just become exactly 0?" Yes &rarr; the flag flips to <code>1</code>. No &rarr; it flips to <code>0</code>. That's the whole instruction.</p>
+      <p>Here's why that matters, using the Countdown Loop example: <code>SUB #1</code> shrinks the counter by one every time round the loop. The moment the counter reaches 0, the Zero flag flips to <code>1</code>. The very next instruction, <code>JZ 10</code>, checks that flag, sees a <code>1</code>, and jumps straight to <code>HALT</code> &mdash; instead of looping again. Without the Zero flag, <code>JZ</code> would have no way of knowing the counter had run out.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>How to use this IDE</h3>
+    <div class="theory">
+      <p>1. Click an example button to load a ready-made program, or type your own into the editor.</p>
+      <p>2. Click <strong>Assemble &amp; Load</strong> to check your code for errors and get the chip ready to run.</p>
+      <p>3. Click <strong>Step</strong> to run one instruction at a time and watch the highlighted line, or click <strong>Run</strong> to play automatically at the speed you choose.</p>
+      <p>4. Right after loading, click any memory cell on the left to change its starting value &mdash; that's your <em>input</em>. Cells lock once you start stepping; click <strong>Reset</strong> to unlock them again.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>The IPO model</h3>
+    <div class="theory">
+      <p>Every computer, from a calculator to a supercomputer, does the same three things, over and over:</p>
+      <ul>
+        <li><strong>Input</strong> &mdash; data goes in. Here, that's the memory cells you set before running.</li>
+        <li><strong>Process</strong> &mdash; the CPU follows instructions one at a time, using the accumulator (ACC) as its scratchpad.</li>
+        <li><strong>Output</strong> &mdash; a result comes out. Here, that's anything printed with <code>OUT</code> or <code>OUTC</code>.</li>
+      </ul>
+      <p>The three panels on the page are colour-coded to match: teal for Input, violet for Process, orange for Output.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Binary &mdash; the bits underneath</h3>
+    <div class="theory">
+      <p>Every memory cell and the ACC register are really just 8 bits (a "byte") underneath the decimal number you see. Watch them under the ACC display, and as little dots under each memory cell.</p>
+      <p>Each bit is worth twice the one before it &mdash; reading left to right: 128, 64, 32, 16, 8, 4, 2, 1. A lit bit means 1; add up the lit bits' place values and you get the decimal number.</p>
+      <p>Negative numbers use a trick called <em>two's complement</em> &mdash; for example, &minus;1 is all eight bits lit: <code>11111111</code>.</p>
+      <p>The bits pulse whenever a value changes &mdash; that's the CPU actually rewriting memory, in front of you.</p>
+      <p>This isn't just for show: EduCPU-8 really is an 8-bit chip. ACC and every memory cell are clamped to <code>-128</code>&ndash;<code>127</code> &mdash; add 1 to <code>127</code> and it genuinely becomes <code>-128</code>, not <code>128</code>. Try the <strong>Overflow!</strong> example to watch it happen.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Instruction set reference</h3>
+    <table class="data">
+      <thead><tr><th>Op</th><th>Operand</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><code>LOAD</code></td><td>addr or #val</td><td>ACC &larr; memory[addr], or ACC &larr; val</td></tr>
+        <tr><td><code>STORE</code></td><td>addr</td><td>memory[addr] &larr; ACC</td></tr>
+        <tr><td><code>ADD</code></td><td>addr or #val</td><td>ACC &larr; ACC + (&hellip;)</td></tr>
+        <tr><td><code>SUB</code></td><td>addr or #val</td><td>ACC &larr; ACC &minus; (&hellip;)</td></tr>
+        <tr><td><code>JMP</code></td><td>line</td><td>jump to that line</td></tr>
+        <tr><td><code>JZ</code></td><td>line</td><td>jump there only if ACC is 0</td></tr>
+        <tr><td><code>OUT</code></td><td>&mdash;</td><td>print ACC as a number</td></tr>
+        <tr><td><code>OUTC</code></td><td>&mdash;</td><td>print ACC as a character</td></tr>
+        <tr><td><code>HALT</code></td><td>&mdash;</td><td>stop the program</td></tr>
+      </tbody>
+    </table>
+    <div class="theory">
+      <p><code>#'H'</code> is shorthand for a character's code &mdash; <code>LOAD #'H'</code> then <code>OUTC</code> prints "H". Lines starting with <code>;</code> are comments and blank lines are ignored, but they still count towards line numbers for <code>JMP</code>/<code>JZ</code>.</p>
+    </div>
+  </div>
+</aside>
+
+<script src="assembler.js"></script>
+<script src="cpu.js"></script>
+<script src="examples.js"></script>
+<script src="ui.js"></script>
+<script src="rail.js"></script>
+</body>
+</html>

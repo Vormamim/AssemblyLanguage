@@ -1,0 +1,189 @@
+/* EduCPU-8 — tokens and base components ported from Vormamim's
+   house-style.css (VormSubs/src/assets/css/house-style.css), plus
+   EduCPU-specific components (memory grid, registers, program listing,
+   console, IPO legend). Ported rather than linked so this stays a fully
+   standalone static site with no dependency on the VormSubs project. */
+
+:root{
+  --bg:#0A0E13; --panel:#121821; --panel-alt:#1A222C; --border:#26323D;
+  --text:#E7EEF4; --text-dim:#8496A6; --text-faint:#54636F;
+  --net:#4FD1C5; --net-dim:#1E4A47; --host:#F2A65A; --host-dim:#4A331B;
+  --danger:#E4626F; --danger-dim:#4A2027; --blue:#5B9BF2; --blue-dim:#1E3350;
+  --violet:#B98CF2; --violet-dim:#332048; --green:#8FD17A; --green-dim:#294222;
+  --mono:'IBM Plex Mono', ui-monospace, monospace; --display:'Space Grotesk', sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+[hidden]{display:none !important;}
+body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(79,209,197,0.08), transparent),
+    radial-gradient(ellipse 900px 500px at 90% 10%, rgba(242,166,90,0.08), transparent),
+    var(--bg);
+  color:var(--text);font-family:var(--mono);padding:32px 20px 80px;min-height:100vh;
+}
+a{color:var(--net);}
+.wrap{max-width:1100px;margin:0 auto;}
+
+header{margin-bottom:20px;}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--net);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--net);box-shadow:0 0 8px var(--net);}
+h1{font-family:var(--display);font-size:clamp(26px,4vw,36px);font-weight:700;margin:0 0 8px;letter-spacing:-0.01em;}
+h2{font-family:var(--display);font-weight:700;font-size:20px;margin:0 0 14px;}
+.sub{color:var(--text-dim);font-size:14px;line-height:1.6;max-width:680px;}
+
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:24px;}
+.panel-label{font-family:var(--display);font-size:13px;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.08em;margin:0 0 16px;display:block;}
+
+.btn{background:var(--net-dim);border:1px solid var(--net);color:var(--net);font-family:var(--display);font-weight:700;font-size:12.5px;padding:9px 16px;border-radius:6px;cursor:pointer;text-decoration:none;display:inline-block;}
+.btn:hover{background:var(--net);color:#0A0E13;}
+.btn.secondary{background:var(--panel-alt);border-color:var(--border);color:var(--text-dim);}
+.btn.secondary:hover{border-color:var(--text-dim);color:var(--text);}
+.btn:disabled{opacity:.5;cursor:not-allowed;background:var(--panel-alt);border-color:var(--border);color:var(--text-faint);}
+.btn:disabled:hover{background:var(--panel-alt);color:var(--text-faint);}
+
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;line-height:1.6;margin-bottom:18px;border:1px solid var(--border);}
+.alert.error{background:var(--danger-dim);border-color:var(--danger);color:var(--danger);}
+.alert ul{margin:6px 0 0;padding-left:18px;}
+
+table.data{width:100%;border-collapse:collapse;font-size:12.5px;}
+table.data th{text-align:left;font-family:var(--display);font-size:10.5px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);border-bottom:1px solid var(--border);padding:8px 10px;}
+table.data td{padding:8px 10px;border-bottom:1px solid var(--border);}
+table.data tr:last-child td{border-bottom:none;}
+table.data code{background:var(--panel-alt);color:var(--net);padding:1px 5px;border-radius:4px;}
+
+textarea, input[type=number]{
+  background:var(--panel-alt);border:1px solid var(--border);color:var(--text);
+  font-family:var(--mono);font-size:14px;border-radius:8px;
+  transition:border-color .15s ease, box-shadow .15s ease;
+  color-scheme:dark;
+}
+textarea:focus, input[type=number]:focus{
+  outline:none;border-color:var(--net);box-shadow:0 0 0 3px color-mix(in srgb, var(--net) 20%, transparent);
+}
+
+/* ---------------------------------------------------------- IPO legend --- */
+.ipo-legend{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;}
+.ipo-chip{font-family:var(--display);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;padding:4px 11px;border-radius:99px;border:1px solid;}
+.ipo-chip.ipo-input{color:var(--net);border-color:var(--net);background:var(--net-dim);}
+.ipo-chip.ipo-process{color:var(--violet);border-color:var(--violet);background:var(--violet-dim);}
+.ipo-chip.ipo-output{color:var(--host);border-color:var(--host);background:var(--host-dim);}
+
+/* ------------------------------------------------------- examples bar --- */
+.examples-bar{display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+.examples-bar .panel-label{margin:0;}
+.examples-buttons{display:flex;gap:10px;flex-wrap:wrap;}
+
+/* -------------------------------------------------------- process panel --- */
+.process-panel{border-top:3px solid var(--violet);}
+.panel-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+.panel-head .panel-label{margin:0;}
+.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.speed-label{font-family:var(--display);font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);display:flex;align-items:center;gap:6px;}
+.speed-label input[type=range]{accent-color:var(--violet);}
+
+#codeEditor{width:100%;min-height:220px;padding:14px 16px;line-height:1.6;font-size:13.5px;resize:vertical;}
+
+.program-listing{list-style:none;counter-reset:none;margin:0;padding:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;font-size:13.5px;line-height:1.6;max-height:340px;overflow-y:auto;}
+.program-listing li{display:flex;gap:12px;padding:2px 14px;border-bottom:1px solid var(--border);white-space:pre;}
+.program-listing li:last-child{border-bottom:none;}
+.program-listing li::before{counter-increment:none;content:attr(data-line);width:2ch;flex:0 0 auto;color:var(--text-faint);text-align:right;}
+.program-listing li.noop{color:var(--text-faint);}
+.program-listing li.instr{color:var(--text);}
+.program-listing li.pc-current{background:var(--violet-dim);color:var(--violet);}
+.program-listing li.pc-current::before{color:var(--violet);}
+
+.registers{display:flex;gap:14px;margin-top:16px;flex-wrap:wrap;}
+.register{background:var(--panel-alt);border:1px solid var(--border);border-radius:8px;padding:10px 18px;text-align:center;min-width:90px;transition:background-color .3s ease, border-color .3s ease;}
+#regAccBox{min-width:256px;}
+.register.flash{background:var(--violet-dim);border-color:var(--violet);}
+.reg-label{display:block;font-family:var(--display);font-size:10.5px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:4px;}
+.reg-value{display:block;font-family:var(--display);font-weight:700;font-size:20px;color:var(--text);}
+
+/* ------------------------------------------------------------------ bits --- */
+/* Every memory cell and ACC are shown as one byte: a strip of 8 lit/unlit
+   bits, pulsing on whichever ones just flipped. Memory's strip is a compact
+   dot pattern (16 cells x 8 bits is a lot of ink); ACC's strip is the big,
+   readable, digit-labelled version students actually read bit-by-bit. */
+.bit{
+  background:var(--panel);border:1px solid var(--border);border-radius:2px;
+  font-size:0;color:transparent;
+  transition:background-color .25s ease, border-color .25s ease, box-shadow .25s ease;
+}
+@keyframes bitPulse{
+  0%{transform:scale(1);}
+  40%{transform:scale(1.7);}
+  100%{transform:scale(1);}
+}
+.bit.changed{animation:bitPulse .5s ease;position:relative;z-index:1;}
+
+.mem-bit-row{display:flex;gap:1px;margin-top:6px;justify-content:center;}
+.mem-bit-row .bit{width:9px;height:12px;}
+.mem-bit-row .bit.on{background:var(--net);border-color:var(--net);box-shadow:0 0 4px color-mix(in srgb, var(--net) 70%, transparent);}
+
+.acc-bit-row{display:flex;gap:4px;margin-top:12px;justify-content:center;}
+.acc-bit-row .bit{
+  width:24px;height:30px;border-radius:4px;font-size:13px;font-family:var(--mono);font-weight:700;
+  display:flex;align-items:center;justify-content:center;color:var(--text-faint);
+}
+.acc-bit-row .bit.on{background:var(--violet);border-color:var(--violet);color:#0A0E13;box-shadow:0 0 8px color-mix(in srgb, var(--violet) 65%, transparent);}
+.bit-places{display:flex;gap:4px;margin-top:4px;justify-content:center;}
+.bit-place{width:24px;text-align:center;font-size:9px;font-family:var(--mono);color:var(--text-faint);}
+
+/* ------------------------------------------------------------ io grid --- */
+.io-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+@media (max-width: 760px){ .io-grid{grid-template-columns:1fr;} }
+
+.input-panel{border-top:3px solid var(--net);}
+.output-panel{border-top:3px solid var(--host);}
+
+.memory-grid{display:grid;grid-template-columns:repeat(4, 1fr);gap:10px;}
+.mem-cell{background:var(--panel-alt);border:1px solid var(--border);border-radius:8px;padding:8px 10px;text-align:center;transition:background-color .3s ease, border-color .3s ease;}
+.mem-cell.flash{background:var(--net-dim);border-color:var(--net);}
+.mem-addr{display:block;font-family:var(--display);font-size:10px;color:var(--text-faint);margin-bottom:4px;}
+.mem-value{width:100%;text-align:center;padding:6px 4px;border-radius:6px;font-size:14px;}
+.mem-value:disabled{opacity:.6;cursor:not-allowed;}
+
+.console{
+  background:var(--panel-alt);border:1px solid var(--border);border-radius:8px;
+  padding:14px 16px;min-height:200px;max-height:340px;overflow-y:auto;
+  font-family:var(--mono);font-size:14px;line-height:1.7;color:var(--host);
+  white-space:pre-wrap;word-break:break-word;margin:0;
+}
+.halted-note{display:block;color:var(--text-faint);font-size:12px;margin:8px 0 0;}
+
+.site-footer{margin-top:40px;padding:20px 0;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;color:var(--text-faint);font-size:11px;}
+
+/* --------------------------------------------- theory/instructions rail --- */
+.rail-toggle{
+  position:fixed;top:50%;right:0;transform:translateY(-50%);z-index:30;
+  writing-mode:vertical-rl;padding:14px 8px;border:1px solid var(--net);border-right:0;
+  border-radius:10px 0 0 10px;background:var(--net);color:#0A0E13;
+  font-family:var(--display);font-weight:700;letter-spacing:0.1em;text-transform:uppercase;
+  font-size:12px;cursor:pointer;
+}
+.rail-toggle:hover{background:var(--net-dim);color:var(--net);}
+
+.rail{
+  position:fixed;top:0;right:0;z-index:40;width:min(440px, 92vw);height:100vh;
+  overflow-y:auto;padding:28px 26px 60px;border-left:1px solid var(--border);
+  background:var(--bg);box-shadow:-20px 0 50px rgba(0,0,0,.5);
+  transform:translateX(100%);transition:transform .22s ease;
+}
+.rail.open{transform:translateX(0);}
+
+.rail-close{
+  position:absolute;top:20px;right:20px;padding:6px 14px;border-radius:6px;
+  border:1px solid var(--border);background:var(--panel-alt);color:var(--text-dim);
+  font-family:var(--display);font-size:11px;font-weight:700;letter-spacing:0.06em;
+  text-transform:uppercase;cursor:pointer;
+}
+.rail-close:hover{border-color:var(--text-dim);color:var(--text);}
+
+.rail .card{margin-bottom:18px;padding:16px 18px;border:1px solid var(--border);border-radius:10px;background:var(--panel);}
+.rail .card h3{margin:0 0 10px;font-size:12px;text-transform:uppercase;letter-spacing:0.1em;color:var(--net);font-family:var(--display);}
+.rail .theory p{margin:0 0 10px;color:var(--text-dim);font-size:13px;line-height:1.6;}
+.rail .theory p:last-child{margin-bottom:0;}
+.rail .theory ul{margin:0;padding-left:18px;color:var(--text-dim);font-size:13px;line-height:1.6;}
+.rail .theory li{margin-bottom:6px;}
+.rail .theory code{background:var(--panel-alt);color:var(--net);padding:1px 5px;border-radius:4px;font-size:.9em;}
