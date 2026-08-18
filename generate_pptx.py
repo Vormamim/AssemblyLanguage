@@ -444,7 +444,45 @@ def build():
 
     add_footer(slide, '08')
 
-    # ---------- 9. Wrap-up ----------
+    # ---------- 9. Ten challenges for students ----------
+    slide = prs.slides.add_slide(blank)
+    set_bg(slide)
+    add_header(slide, 'ON YOUR OWN', VIOLET, '10 Challenges for Students', num='09')
+    add_textbox(slide, Emu(502920), Emu(1554480), Emu(11155680), Emu(365760),
+                'Each one builds on a worked example from this deck — same nine instructions, new problem.',
+                font=MONO, size=12.5, color=TEXT_DIM, line_spacing=1.3)
+
+    CHALLENGES = [
+        ('1', 'Print your initials', 'Warm-up', NET, "LOAD #'…', OUTC"),
+        ('2', 'Triple a number', 'Warm-up', NET, 'LOAD, ADD, ADD, STORE, OUT'),
+        ('3', 'Is it zero?', 'Warm-up', NET, 'LOAD, JZ, branch to YES/NO'),
+        ('4', 'Count up to a target', 'Core', VIOLET, 'loop, ADD #1, JZ to stop'),
+        ('5', 'Sum from 1 to N', 'Core', VIOLET, 'loop + a running total in memory'),
+        ('6', 'Halve a number by counting', 'Core', VIOLET, 'repeated SUB, count how many times'),
+        ('7', 'Are three numbers all equal?', 'Core', VIOLET, 'two chained comparisons'),
+        ('8', 'Countdown, then shout GO!', 'Core', VIOLET, 'a loop followed by fixed text output'),
+        ('9', 'Predict the overflow', 'Stretch', HOST, 'hand-calculate first, then Step to check'),
+        ('10', 'Design your own', 'Stretch', HOST, 'combine instructions nobody told you to combine'),
+    ]
+
+    gfx = add_table(
+        slide, Emu(502920), Emu(2011680), Emu(11155680), Emu(4350000),
+        headers=['#', 'CHALLENGE', 'LEVEL', 'SKILLS'],
+        rows=[[num, title, level, skills] for num, title, level, _accent, skills in CHALLENGES],
+        accent=VIOLET,
+    )
+    for col, width in zip(gfx.table.columns, [Emu(548640), Emu(4389120), Emu(1554480), Emu(4663440)]):
+        col.width = width
+    for ri, (_num, _title, level, accent, _skills) in enumerate(CHALLENGES):
+        cell = gfx.table.cell(ri + 1, 2)
+        for p in cell.text_frame.paragraphs:
+            for r in p.runs:
+                r.font.color.rgb = rgb(accent)
+                r.font.bold = True
+
+    add_footer(slide, '09')
+
+    # ---------- 10. Wrap-up ----------
     slide = prs.slides.add_slide(blank)
     set_bg(slide)
     add_rect(slide, Emu(0), Emu(0), SLIDE_W, Emu(76200), VIOLET)
